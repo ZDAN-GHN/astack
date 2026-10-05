@@ -1,7 +1,0 @@
-interface:
-  display_name: "Incident Evidence Diagnosis"
-  short_description: "Diagnose incidents from evidence without overclaiming"
-  default_prompt: "Use $incident-evidence-diagnosis to investigate this incident before repair."
-
-policy:
-  allow_implicit_invocation: true

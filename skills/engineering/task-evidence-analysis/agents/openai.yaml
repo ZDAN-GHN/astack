@@ -1,7 +1,0 @@
-interface:
-  display_name: "Task Evidence Analysis"
-  short_description: "Trace task impact from repository evidence"
-  default_prompt: "Use $task-evidence-analysis to analyze this task before implementation."
-
-policy:
-  allow_implicit_invocation: true

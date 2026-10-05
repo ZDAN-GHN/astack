@@ -1,1 +1,0 @@
-../../../../assets/closed-loop/protocols/engineering-quality.md

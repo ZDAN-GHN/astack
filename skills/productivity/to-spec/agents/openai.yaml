@@ -1,5 +1,0 @@
-interface:
-  display_name: "工程规格生成器"
-  short_description: "将已确认讨论固化为中文工程规格"
-policy:
-  allow_implicit_invocation: false

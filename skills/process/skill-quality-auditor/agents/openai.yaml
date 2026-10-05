@@ -1,6 +1,0 @@
-interface:
-  display_name: "Skill Quality Auditor"
-  short_description: "审查技能结构、触发条件、流程标准、验证与安全边界改进"
-  default_prompt: "Use $skill-quality-auditor to review this skill against the five explicitness principles and current skill design best practices."
-policy:
-  allow_implicit_invocation: true
