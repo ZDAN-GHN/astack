@@ -3,3 +3,4 @@
 !.pi/agents/
 tmp/
 skills-lock.json
+pi-session-*.html
