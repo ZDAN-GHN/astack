@@ -5,7 +5,9 @@
 SKILL.md）。
 
 本文件是面向人的用法说明：安装、引擎配置、参数与疑难排查。
-Agent 的工作流程与产物约定见 SKILL.md。
+Agent 的工作流程与产物约定见 SKILL.md。目录结构：脚本在 `scripts/`，
+思维导图模板在 `templates/`，配置模板 `extract.conf.example` 与工具模型
+缓存 `.tools/` 在技能根目录。
 
 ## 先决条件
 
@@ -21,7 +23,7 @@ bash、curl、ffmpeg（PATH 上）、python3（标准库即可，无需 pip）�
 ### siliconflow（远程，推荐）
 
 1. 到 <https://cloud.siliconflow.cn/account/ak> 免费注册并创建 API key；
-2. 把 `extract.conf.example` 复制为 `extract.conf`，写入：
+2. 把技能根目录的 `extract.conf.example` 复制为 `extract.conf`，写入：
 
    ```sh
    ENGINE=siliconflow
@@ -37,12 +39,12 @@ bash、curl、ffmpeg（PATH 上）、python3（标准库即可，无需 pip）�
 
 ### whisper-cpp（本地，离线可用）
 
-首次使用先 bootstrap（下载 yt-dlp、whisper.cpp 预编译二进制和模型到本
-目录 `.tools/`）：
+首次使用先 bootstrap（下载 yt-dlp、whisper.cpp 预编译二进制和模型到技能
+根目录 `.tools/`）：
 
 ```sh
 cd ~/.agents/skills/video-transcribe
-./extract.sh --bootstrap          # 默认模型 large-v3-turbo（约 1.6 GB）
+./scripts/extract.sh --bootstrap          # 默认模型 large-v3-turbo（约 1.6 GB）
 ```
 
 模型选择：`tiny/base` 仅适合快速验证链路，中文质量差；实际使用建议
@@ -57,14 +59,14 @@ large-v3-turbo 转写约 1.8GB 内存、CPU 满载半小时起步，容易撞 OO
 B 站视频（在任意工作目录）：
 
 ```sh
-~/.agents/skills/video-transcribe/extract.sh 'https://www.bilibili.com/video/BVxxxxxxxxxx'
+~/.agents/skills/video-transcribe/scripts/extract.sh 'https://www.bilibili.com/video/BVxxxxxxxxxx'
 # 输出：./transcripts/<视频id>/transcript.md + input.json（附原始音频 source.*）
 ```
 
 本地音频：
 
 ```sh
-~/.agents/skills/video-transcribe/extract.sh --audio 录音.m4a --out 输出目录
+~/.agents/skills/video-transcribe/scripts/extract.sh --audio 录音.m4a --out 输出目录
 ```
 
 在 shell 里手动运行只完成转写；阅读报告/摘要/笔记是 Agent 读取产物后
@@ -87,7 +89,7 @@ B 站视频（在任意工作目录）：
 
 ## 持久配置
 
-把 `extract.conf.example` 复制为 `extract.conf` 修改（含密钥，已
+把技能根目录的 `extract.conf.example` 复制为 `extract.conf` 修改（含密钥，已
 gitignore）。优先级：命令行 > 环境变量（`EXTRACT_MODEL`、
 `SILICONFLOW_API_KEY` 等）> conf > 默认值。
 
@@ -110,5 +112,5 @@ gitignore）。优先级：命令行 > 环境变量（`EXTRACT_MODEL`、
 - **平台支持**：本地 whisper.cpp 为预编译二进制（Linux x86_64），
   macOS/Windows 需自行编译 whisper.cpp 后放 PATH，或直接用 siliconflow
   远程引擎（任何能访问 API 的平台可用）。bootstrap 依赖 GitHub 与
-  Hugging Face（或镜像）可达；全部产物缓存在本目录 `.tools/`，整个技能
+  Hugging Face（或镜像）可达；全部产物缓存在技能根目录 `.tools/`，整个技能
   目录拷走即可离线使用。

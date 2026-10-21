@@ -2,13 +2,13 @@
 # Bilibili 链接 / 本地音频 → 带时间戳的转写文本（transcript.md + input.json）。
 # 零 pip / venv 依赖：只需要 bash、curl、ffmpeg、python3（标准库）。
 # 首次运行 --bootstrap 会把 yt-dlp 单文件二进制、whisper.cpp 预编译二进制
-# 和所选模型下载到本目录 .tools/ 下；之后整个技能目录拷到任何有 ffmpeg 的
+# 和所选模型下载到技能根目录 .tools/ 下；之后整个技能目录拷到任何有 ffmpeg 的
 # Linux 机器即可直接使用。
 #
 # 用法：
-#   ./extract.sh 'https://www.bilibili.com/video/BVxxxxxxxxxx'
-#   ./extract.sh --audio 本地音频.m4a
-#   ./extract.sh --bootstrap                # 只安装工具和默认模型，不转写
+#   ./scripts/extract.sh 'https://www.bilibili.com/video/BVxxxxxxxxxx'
+#   ./scripts/extract.sh --audio 本地音频.m4a
+#   ./scripts/extract.sh --bootstrap                # 只安装工具和默认模型，不转写
 #
 # 参数：
 #   --out DIR      输出目录（默认 ./transcripts/<视频id|时间戳>）
@@ -24,13 +24,14 @@
 #   --audio FILE   转写本地音频文件，跳过下载
 #   --bootstrap    下载缺失的工具与模型后退出
 #
-# 持久配置：把 extract.conf.example 复制为 extract.conf 并按需修改。
+# 持久配置：把技能根目录的 extract.conf.example 复制为同目录的 extract.conf 并按需修改。
 # 优先级：命令行参数 > 环境变量（EXTRACT_MODEL、SILICONFLOW_API_KEY 等）> extract.conf > 默认值。
 
 set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-TOOLS="$SCRIPT_DIR/.tools"
+SKILL_DIR=$(cd "$SCRIPT_DIR/.." && pwd)
+TOOLS="$SKILL_DIR/.tools"
 MODELS="$TOOLS/models"
 DEFAULT_MODEL=large-v3-turbo
 # 固定到已验证的 whisper.cpp 预编译发布（b5454）；可用 EXTRACT_WHISPER_URL 或 conf 覆盖
@@ -45,7 +46,7 @@ WHISPER_URL=""
 ENV_SILICONFLOW_KEY=${SILICONFLOW_API_KEY:-}
 ENV_SILICONFLOW_BASE=${SILICONFLOW_BASE_URL:-}
 ENV_SILICONFLOW_MODEL=${SILICONFLOW_MODEL:-}
-if [ -f "$SCRIPT_DIR/extract.conf" ]; then . "$SCRIPT_DIR/extract.conf"; fi
+if [ -f "$SKILL_DIR/extract.conf" ]; then . "$SKILL_DIR/extract.conf"; fi
 MODEL=${EXTRACT_MODEL:-${MODEL:-}}
 LANGUAGE=${EXTRACT_LANGUAGE:-${LANGUAGE:-}}
 THREADS=${EXTRACT_THREADS:-${THREADS:-}}
