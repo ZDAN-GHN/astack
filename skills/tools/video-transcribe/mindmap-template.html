@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>思维导图</title>
+<style>
+  html, body { margin: 0; height: 100%; }
+  .markmap { position: absolute; inset: 0; }
+  .markmap > svg { width: 100%; height: 100%; }
+  .fallback { padding: 2em; font: 14px/1.7 sans-serif; color: #555; }
+</style>
+<script>window.markmap = { autoLoader: { manual: false } }</script>
+<script src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18"></script>
+</head>
+<body>
+<div class="markmap">
+<script type="text/template">
+---
+markmap:
+  initialExpandLevel: 2
+  maxWidth: 380
+  spacingVertical: 8
+---
+
+# {{在此写标题}}
+
+## 大纲第一层
+
+- 要点一
+  - 细节
+- 要点二
+
+## 大纲第二层
+
+- 要点
+</script>
+</div>
+<noscript><div class="fallback">渲染思维导图需要 JavaScript。离线时请看同目录的笔记/摘要 Markdown 文件。</div></noscript>
+<div class="fallback" id="err" hidden>思维导图库加载失败（可能离线）。请看同目录的 Markdown 产物，或联网后刷新本页。</div>
+<script>
+  setTimeout(function () {
+    if (!document.querySelector('.markmap svg'))
+      document.getElementById('err').hidden = false;
+  }, 5000);
+</script>
+</body>
+</html>
