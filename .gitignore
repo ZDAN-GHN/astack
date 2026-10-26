@@ -5,3 +5,4 @@ tmp/
 skills-lock.json
 pi-session-*.html
 __pycache__/
+.claude/*
