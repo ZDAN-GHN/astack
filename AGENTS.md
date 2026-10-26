@@ -35,7 +35,17 @@ The user runs `/reload` in Pi after a skill or its frontmatter changes.
 
 - `~/.agents/skills/` is Pi's user skill directory. Every entry in it is a symlink to a directory in this repo, one entry per skill.
 - Categorize by what the skill does, not by who published it.
-- `global-agents-principle.md` at the repo root is the global principles asset, distributed to `~/.agents/AGENTS.md`, which Pi loads across every working directory. It is not this repo's own instruction file.
+- `global-agents-principle.md` is the global principles asset. Publish it by symlink at `~/.agents/AGENTS.md` for shared consumers and at `~/.pi/agent/AGENTS.md` for Pi's native context loader. This repo's own instructions remain in this file.
+
+## Verify library assets
+
+| Check | Command |
+| --- | --- |
+| Frontmatter, bundled references, and published symlinks | `node scripts/check-assets.mjs --installed` |
+| Pi's native skill/global instruction discovery and configured model IDs | `node scripts/check-runtime.mjs` |
+| Checker regression fixtures | `node --test scripts/check-assets.test.mjs scripts/check-runtime.test.mjs` |
+
+`check-assets` has a constrained dependency-free YAML reader. For Pi's exact parser, add `--pi-runtime "$(npm root -g)/@earendil-works/pi-coding-agent"`. `check-runtime` locates Pi from PATH; use its `--pi-runtime` option for another installation. Runtime checks use the selected SDK with extensions, package resources, credential access, provider refresh, and persistent model writes disabled. Passing these checks proves packaging and discovery, not the quality of future agent work. `.github/workflows/validate-assets.yml` runs the portable asset checker and its regression fixtures on pushes and pull requests; host discovery and personal symlink checks stay local.
 
 ## Don't
 

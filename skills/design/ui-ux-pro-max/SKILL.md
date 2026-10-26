@@ -15,7 +15,7 @@ Skip it for pure backend logic, API/database design, non-visual performance work
 
 ## Rule Categories by Priority
 
-*Follow priority 1→10 to decide which category to focus on first; use `--domain <Domain>` to query full details. The full rule text for every category lives in `references/quick-reference.md` — read it on demand rather than loading it every time.*
+*Follow priority 1→10 to decide which category to focus on first; use `--domain <Domain>` to query full details. The full rule text for every category lives in [references/quick-reference.md](references/quick-reference.md) — read it on demand rather than loading it every time.*
 
 | Priority | Category | Impact | Domain | Key Checks (Must Have) | Anti-Patterns (Avoid) |
 |----------|----------|--------|--------|------------------------|------------------------|
@@ -30,16 +30,16 @@ Skip it for pure backend logic, API/database design, non-visual performance work
 | 9 | Navigation Patterns | HIGH | `ux` | Predictable back, Bottom nav ≤5, Deep linking | Overloaded nav, Broken back behavior, No deep links |
 | 10 | Charts & Data | LOW | `chart` | Legends, Tooltips, Accessible colors | Relying on color alone to convey meaning |
 
-For the full rule list per category (all 119 UX guidelines with rationale), read `references/quick-reference.md`. For app-specific polish rules (icons, touch feedback, dark mode contrast, safe areas) and the canonical pre-delivery checklist, read `references/pro-rules.md`.
+For the full rule list per category (all 119 UX guidelines with rationale), read [references/quick-reference.md](references/quick-reference.md). For app-specific polish rules (icons, touch feedback, dark mode contrast, safe areas) and the canonical pre-delivery checklist, read [references/pro-rules.md](references/pro-rules.md).
 
 ---
 
 ## Running the search tool
 
-The search script lives inside this skill's own directory, not the project directory. Always invoke it by its full path — do not assume a particular working directory:
+The search script lives inside this skill's own directory — [scripts/search.py](scripts/search.py) — not the project directory. All paths in this document are relative to this skill's root (the directory containing this SKILL.md) and are pinned as markdown links; resolve them from there, not from your current working directory:
 
 ```bash
-python "${CLAUDE_PLUGIN_ROOT}/.claude/skills/ui-ux-pro-max/scripts/search.py" "<query>" --domain <domain>
+python scripts/search.py "<query>" --domain <domain>
 ```
 
 If `python` is not found, try `python3`, then `py -3`. Requires Python 3.x, no external dependencies (see README for install instructions if Python is missing).
@@ -75,14 +75,14 @@ Extract from the user request:
 Use `--design-system` when the task needs a coherent product-wide visual direction:
 
 ```bash
-python "${CLAUDE_PLUGIN_ROOT}/.claude/skills/ui-ux-pro-max/scripts/search.py" "<product_type> <industry> <keywords>" --design-system [-p "Project Name"]
+python scripts/search.py "<product_type> <industry> <keywords>" --design-system [-p "Project Name"]
 ```
 
-This aggregates product/style/color/landing/typography matches, applies reasoning rules from `ui-reasoning.csv`, and returns pattern, style, colors, typography, effects, and anti-patterns to avoid.
+This aggregates product/style/color/landing/typography matches, applies reasoning rules from [data/ui-reasoning.csv](data/ui-reasoning.csv), and returns pattern, style, colors, typography, effects, and anti-patterns to avoid.
 
 **Example:**
 ```bash
-python "${CLAUDE_PLUGIN_ROOT}/.claude/skills/ui-ux-pro-max/scripts/search.py" "beauty spa wellness service" --design-system -p "Serenity Spa"
+python scripts/search.py "beauty spa wellness service" --design-system -p "Serenity Spa"
 ```
 
 ### Step 2b: Persist Design System (Master + Overrides Pattern)
@@ -90,7 +90,7 @@ python "${CLAUDE_PLUGIN_ROOT}/.claude/skills/ui-ux-pro-max/scripts/search.py" "b
 To save the design system for retrieval across sessions, add `--persist` **and always pass `--output-dir` pointed at the project root** — without it, files are written relative to whatever directory the tool happens to run from:
 
 ```bash
-python "${CLAUDE_PLUGIN_ROOT}/.claude/skills/ui-ux-pro-max/scripts/search.py" "<query>" --design-system --persist -p "Project Name" --output-dir "<project-root>"
+python scripts/search.py "<query>" --design-system --persist -p "Project Name" --output-dir "<project-root>"
 ```
 
 This creates:
@@ -113,7 +113,7 @@ Read an existing `MASTER.md` before deciding whether `--force` is justified. Nev
 Three optional 1-10 sliders that tune `--design-system` output without changing your query. Add any combination of them to the same command:
 
 ```bash
-python "${CLAUDE_PLUGIN_ROOT}/.claude/skills/ui-ux-pro-max/scripts/search.py" "<query>" --design-system --variance <1-10> --motion <1-10> --density <1-10>
+python scripts/search.py "<query>" --design-system --variance <1-10> --motion <1-10> --density <1-10>
 ```
 
 | Dial | Low (1-3) | Mid (4-7) | High (8-10) |
@@ -128,13 +128,13 @@ python "${CLAUDE_PLUGIN_ROOT}/.claude/skills/ui-ux-pro-max/scripts/search.py" "<
 
 **Example:**
 ```bash
-python "${CLAUDE_PLUGIN_ROOT}/.claude/skills/ui-ux-pro-max/scripts/search.py" "internal analytics dashboard" --design-system --variance 8 --motion 7 --density 8 -p "Ops Console"
+python scripts/search.py "internal analytics dashboard" --design-system --variance 8 --motion 7 --density 8 -p "Ops Console"
 ```
 
 ### Step 3: Supplement with Detailed Searches (as needed)
 
 ```bash
-python "${CLAUDE_PLUGIN_ROOT}/.claude/skills/ui-ux-pro-max/scripts/search.py" "<keyword>" --domain <domain> [-n <max_results>]
+python scripts/search.py "<keyword>" --domain <domain> [-n <max_results>]
 ```
 
 | Need | Domain | Example |
@@ -157,7 +157,7 @@ Domain is auto-detected from the query if `--domain` is omitted — but auto-det
 ### Step 4: Stack Guidelines
 
 ```bash
-python "${CLAUDE_PLUGIN_ROOT}/.claude/skills/ui-ux-pro-max/scripts/search.py" "<keyword>" --stack <stack>
+python scripts/search.py "<keyword>" --stack <stack>
 ```
 
 **Available stacks:** `react`, `nextjs`, `vue`, `svelte`, `astro`, `nuxtjs`, `nuxt-ui`, `angular`, `laravel`, `swiftui`, `react-native`, `flutter`, `jetpack-compose`, `html-tailwind`, `shadcn`, `threejs`, `javafx`, `wpf`, `winui`, `avalonia`, `uno`, `uwp`. Use the stack detected in Step 1.
@@ -177,13 +177,13 @@ Do not fabricate output. Instead:
 
 ```bash
 # Step 2: design system
-python "${CLAUDE_PLUGIN_ROOT}/.claude/skills/ui-ux-pro-max/scripts/search.py" "AI search tool modern minimal" --design-system -p "AI Search"
+python scripts/search.py "AI search tool modern minimal" --design-system -p "AI Search"
 
 # Step 3: supplement
-python "${CLAUDE_PLUGIN_ROOT}/.claude/skills/ui-ux-pro-max/scripts/search.py" "keyboard focus modal" --domain ux
+python scripts/search.py "keyboard focus modal" --domain ux
 
 # Step 4: stack guidelines
-python "${CLAUDE_PLUGIN_ROOT}/.claude/skills/ui-ux-pro-max/scripts/search.py" "suspense streaming bundle" --stack nextjs
+python scripts/search.py "suspense streaming bundle" --stack nextjs
 ```
 
 Then synthesize the design system + detailed searches and implement.
@@ -202,13 +202,13 @@ Then synthesize the design system + detailed searches and implement.
 | Problem | What to Do |
 |---------|------------|
 | Can't decide on style/color | Re-run `--design-system` with different keywords |
-| Dark mode contrast issues | `references/quick-reference.md` §6: `color-dark-mode` + `color-accessible-pairs` |
-| Animations feel unnatural | `references/quick-reference.md` §7: `spring-physics` + `easing` + `exit-faster-than-enter` |
-| Form UX is poor | `references/quick-reference.md` §8: `inline-validation` + `error-clarity` + `focus-management` |
-| Navigation feels confusing | `references/quick-reference.md` §9: `nav-hierarchy` + `bottom-nav-limit` + `back-behavior` |
-| Layout breaks on small screens | `references/quick-reference.md` §5: `mobile-first` + `breakpoint-consistency` |
-| Performance / jank | `references/quick-reference.md` §3: `virtualize-lists` + `main-thread-budget` + `debounce-throttle` |
+| Dark mode contrast issues | [references/quick-reference.md](references/quick-reference.md) §6: `color-dark-mode` + `color-accessible-pairs` |
+| Animations feel unnatural | [references/quick-reference.md](references/quick-reference.md) §7: `spring-physics` + `easing` + `exit-faster-than-enter` |
+| Form UX is poor | [references/quick-reference.md](references/quick-reference.md) §8: `inline-validation` + `error-clarity` + `focus-management` |
+| Navigation feels confusing | [references/quick-reference.md](references/quick-reference.md) §9: `nav-hierarchy` + `bottom-nav-limit` + `back-behavior` |
+| Layout breaks on small screens | [references/quick-reference.md](references/quick-reference.md) §5: `mobile-first` + `breakpoint-consistency` |
+| Performance / jank | [references/quick-reference.md](references/quick-reference.md) §3: `virtualize-lists` + `main-thread-budget` + `debounce-throttle` |
 
 ## Before Delivering App UI
 
-Read `references/pro-rules.md` and run through its canonical Pre-Delivery Checklist. It covers icon/visual-element discipline, interaction feedback, light/dark contrast, safe-area layout, and accessibility — scoped to native/mobile app UI (iOS/Android/React Native/Flutter).
+Read [references/pro-rules.md](references/pro-rules.md) and run through its canonical Pre-Delivery Checklist. It covers icon/visual-element discipline, interaction feedback, light/dark contrast, safe-area layout, and accessibility — scoped to native/mobile app UI (iOS/Android/React Native/Flutter).

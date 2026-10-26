@@ -6,13 +6,9 @@ disable-model-invocation: true
 
 # How
 
-On Codex, read the [platform mapping](../poteto-mode/references/codex-tools.md), including its per-skill notes, before following this skill.
-
-On GitHub Copilot, read the [platform mapping](../poteto-mode/references/copilot-tools.md), including its per-skill notes, before following this skill.
-
 Explore the codebase to answer "how does X work?" questions. Produce architectural explanations at the level of a senior engineer onboarding onto a subsystem, enough to build a working mental model, not so much that it reads like annotated source code.
 
-Each spawn below names a role line in `pstack-models.md` and a default in [Models](#models). Set `model` to that line's value, or to the default if the sheet or the line is missing. Leave `model` unset when the value is `auto` or `inherit-parent`. If the `Agent` tool rejects a slug, use the default and say so. If it rejects the default, use the closest valid slug of the same family from its error message.
+Every spawn below names a seat. Resolve it per [Seats](#seats).
 
 ## Step 1. Assess Complexity
 
@@ -25,31 +21,19 @@ When in doubt, take the simple path.
 
 ## Step 2a. Explore (complex questions only)
 
-Decompose the question into 2 to 4 exploration angles, each a distinct slice of the subsystem. Spawn all explorers in a single message:
-
-- `subagent_type`: `general-purpose`
-- `model`: the `how explorer` line, default in [Models](#models)
-- `readonly`: `true`
+Decompose the question into 2 to 4 exploration angles, each a distinct slice of the subsystem. Spawn all explorers in a single message, each read-only, on the `explorer` seat.
 
 Each explorer gets the prompt in `references/explorer-prompt.md` with its angle filled in. Then go to Step 3.
 
 ## Step 2b. Direct Explain (simple questions)
 
-Spawn one `Agent` subagent that explores and explains in one pass:
-
-- `subagent_type`: `general-purpose`
-- `model`: the `how explainer` line, default in [Models](#models)
-- `readonly`: `true`
+Spawn one read-only subagent on the `explainer` seat that explores and explains in one pass.
 
 Build its prompt from `references/explainer-prompt.md` without the explorer-findings section. Go to Step 4.
 
 ## Step 3. Synthesize (complex questions only)
 
-Once all explorers have returned, spawn one `Agent` subagent to synthesize their findings into one explanation:
-
-- `subagent_type`: `general-purpose`
-- `model`: the `how explainer` line, default in [Models](#models)
-- `readonly`: `true`
+Once all explorers have returned, spawn one read-only subagent on the `explainer` seat to synthesize their findings into one explanation.
 
 Build its prompt from `references/explainer-prompt.md` with every explorer's findings filled in.
 
@@ -61,13 +45,17 @@ Present the explainer's output to the user. Light edits for clarity or context f
 
 The explanation uses the sections defined in `references/explainer-prompt.md`, dropping any that do not apply: Overview, Key Concepts, How It Works, Where Things Live, Gotchas.
 
-## Models
+## Seats
 
-Role defaults, stamped from `plugins/pstack/models.json` (edit there, rerun `tools/generate.mjs`). A matching role line in the `pstack-models.md` override sheet overrides each at runtime; `/setup-pstack` writes it and lists its path per runtime.
+A seat is a capability profile plus a reasoning effort, never a model name. Resolve each seat in this order:
 
-- how explorer: `opus`
-- how explainer: `opus`
+1. Use your environment's own role-to-model mapping when it has one for that seat. Its file, variable, or setting name is specific to that runtime, so don't assume a path.
+2. Otherwise leave the model unset so the harness picks, and set only the reasoning effort.
+3. When you must choose a model by hand, match the profile, then say which seat ran on what. If nothing available fits, say so instead of quietly substituting.
 
-## Reasoning effort
+Effort, weakest to strongest: `minimal`, `low`, `medium`, `high`, `max`. Use the closest level your runtime offers, and leave effort unset to inherit the parent's.
 
-A role value in the override sheet may name a reasoning effort after its model, as in `opus @xhigh`. Levels on Claude Code: `low`, `medium`, `high`, `xhigh`, `max`. Which ones apply depends on the model. A value without `@` takes the sheet's `default effort` line, a level or `session`, and `session` when the sheet has no such line. `session` sets no effort, so the dispatch is the usual one. Strip the suffix before reading the model: `inherit-parent` or `auto` still omits `model` at every level, and a model name is passed as `model`. On Claude Code, a level picks the effort agent from the `subagent_type` you would otherwise use. `pstack:poteto-agent` becomes `subagent_type: "pstack:poteto-agent-<level>"`. `general-purpose`, or no `subagent_type`, becomes `subagent_type: "pstack:effort-<level>"`. The effort agents set only `effort`, so the model you pass still decides the model. On Codex, pass the level as `spawn_agent`'s `reasoning_effort` and keep the usual instructions.
+| Seat | Profile | Effort |
+| --- | --- | --- |
+| explorer | Fast and cheap across many files. Reports what the code does with paths and line references, and resists filling gaps with guesses. | low |
+| explainer | Strong synthesis and plain prose for a senior-engineer reader. Turns findings into a mental model rather than a file tour. | high |

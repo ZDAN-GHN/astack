@@ -13,7 +13,7 @@ This command systematically updates:
 
 ### Step 1: Gather Brand Input
 
-Use `AskUserQuestion` to collect:
+Use the runtime's available question interface, or concise numbered choices in chat to collect:
 
 **Theme Selection:**
 - Theme name (e.g., "Ocean Professional", "Electric Creative", "Forest Calm")
@@ -101,13 +101,13 @@ Output summary:
 
 ```bash
 # Interactive mode
-/brand:update
+/skill:brand update
 
 # With theme hint
-/brand:update "Ocean Professional"
+/skill:brand update "Ocean Professional"
 
 # Quick preset
-/brand:update "midnight purple"
+/skill:brand update "midnight purple"
 ```
 
 ## Color Presets

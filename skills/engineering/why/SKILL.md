@@ -6,15 +6,11 @@ disable-model-invocation: true
 
 # Why
 
-On Codex, read the [platform mapping](../poteto-mode/references/codex-tools.md), including its per-skill notes, before following this skill.
-
-On GitHub Copilot, read the [platform mapping](../poteto-mode/references/copilot-tools.md), including its per-skill notes, before following this skill.
-
 Investigate the motivation and intent behind code.
 
 Companion to the `how` skill. `how` answers what the code does and how it works. `why` answers what forces led to its shape.
 
-Each spawn below names a role line in `pstack-models.md` and a default in [Models](#models). Set `model` to that line's value, or to the default if the sheet or the line is missing. Leave `model` unset when the value is `auto` or `inherit-parent`. If the `Agent` tool rejects a slug, use the default and say so. If it rejects the default, use the closest valid slug of the same family from its error message.
+Every spawn below names a seat. Resolve it per [Seats](#seats).
 
 ## Operating Posture
 
@@ -65,7 +61,7 @@ Capture this as seed context (file paths, symbols, commits, PR numbers, linked t
 
 ### Discovery
 
-Before spawning investigators, list the available MCPs in the Claude Code environment. Use the tool list at the top of the system prompt (every MCP appears as a tool with prefix `mcp__<server>__<name>`). Otherwise read `.mcp.json` in the plugin/project, or run `claude mcp list`.
+Before spawning investigators, take inventory of the evidence sources your environment actually exposes. Tool connectors usually surface as tools with a server prefix, and configuration for them may live in a project or user config file or a CLI subcommand, depending on the runtime. List what you have, then map it.
 
 Map each available MCP to one evidence category:
 
@@ -84,9 +80,8 @@ Aim for a complete **coverage map**, not a minimal one. Document the null, don't
 Launch all matching investigators in a single message so they run concurrently. Don't ask one agent to cover multiple MCPs.
 
 Subagent config (each):
-- `subagent_type`: `general-purpose`
-- `model`: the `why investigators` line, default in [Models](#models)
-- `readonly`: `false` (agent mode). **Do not use readonly/Ask mode.** It strips MCP access, which disables MCP-backed investigators entirely. Investigators still shouldn't write anything.
+- one `investigator` seat per [Seats](#seats)
+- tool access on, not read-only. A read-only subagent may lose the connector or MCP access the investigator exists for. Investigators still shouldn't write anything.
 
 Each investigator gets:
 1. The base prompt from `references/investigator-prompt.md`
@@ -126,11 +121,9 @@ If your scope assessment suggests a single-commit trivial target where the PR de
 
 ## Step 4. Synthesize
 
-Spawn one synthesizer subagent:
+Spawn one synthesizer subagent on the `synthesizer` seat:
 
-- `subagent_type`: `general-purpose`
-- `model`: the `why synthesizer` line, default in [Models](#models)
-- `readonly`: `false` (agent mode). The synthesizer's quality check spot-verifies citations, which can require MCP access. Readonly/Ask mode strips MCPs and defeats that.
+- tool access on, not read-only. The synthesizer's quality check spot-verifies citations, which can require connector access. A read-only subagent may lose it and defeat that check.
 
 The synthesizer gets:
 1. The investigator findings, including any null results and any categories skipped with justification
@@ -161,13 +154,17 @@ After the Sources Consulted block, if the user's `why` question is a precursor t
 - `references/sources/*.md`. One self-contained example playbook per category, plus cross-cutting `incident-postmortem.md`. Give an investigator the single file that matches its category and adapt it to the available MCP.
 - `references/synthesizer-prompt.md`. Prompt template for the synthesizer subagent, including the output format.
 
-## Models
+## Seats
 
-Role defaults, stamped from `plugins/pstack/models.json` (edit there, rerun `tools/generate.mjs`). A matching role line in the `pstack-models.md` override sheet overrides each at runtime; `/setup-pstack` writes it and lists its path per runtime.
+A seat is a capability profile plus a reasoning effort, never a model name. Resolve each seat in this order:
 
-- why investigators: `opus`
-- why synthesizer: `opus`
+1. Use your environment's own role-to-model mapping when it has one for that seat. Its file, variable, or setting name is specific to that runtime, so don't assume a path.
+2. Otherwise leave the model unset so the harness picks, and set only the reasoning effort.
+3. When you must choose a model by hand, match the profile, then say which seat ran on what. If nothing available fits, say so instead of quietly substituting.
 
-## Reasoning effort
+Effort, weakest to strongest: `minimal`, `low`, `medium`, `high`, `max`. Use the closest level your runtime offers, and leave effort unset to inherit the parent's.
 
-A role value in the override sheet may name a reasoning effort after its model, as in `opus @xhigh`. Levels on Claude Code: `low`, `medium`, `high`, `xhigh`, `max`. Which ones apply depends on the model. A value without `@` takes the sheet's `default effort` line, a level or `session`, and `session` when the sheet has no such line. `session` sets no effort, so the dispatch is the usual one. Strip the suffix before reading the model: `inherit-parent` or `auto` still omits `model` at every level, and a model name is passed as `model`. On Claude Code, a level picks the effort agent from the `subagent_type` you would otherwise use. `pstack:poteto-agent` becomes `subagent_type: "pstack:poteto-agent-<level>"`. `general-purpose`, or no `subagent_type`, becomes `subagent_type: "pstack:effort-<level>"`. The effort agents set only `effort`, so the model you pass still decides the model. On Codex, pass the level as `spawn_agent`'s `reasoning_effort` and keep the usual instructions.
+| Seat | Profile | Effort |
+| --- | --- | --- |
+| investigator | Careful extraction from one evidence source at a time. Quotes what it finds, says plainly when a source holds nothing, and never fills silence with plausibility. Fast enough to run one per source. | medium |
+| synthesizer | Strong judgment over fragmentary and contradictory evidence. Keeps confidence tiers intact in its prose instead of flattening them into certainty. | high |

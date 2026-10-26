@@ -46,7 +46,7 @@ node scripts/extract-colors.cjs <image-path>
 ## Brand Sync Workflow
 
 ```bash
-# 1. Edit docs/brand-guidelines.md (or use /brand update)
+# 1. Edit docs/brand-guidelines.md (or use /skill:brand update)
 # 2. Sync to design tokens
 node scripts/sync-brand-to-tokens.cjs
 # 3. Verify
