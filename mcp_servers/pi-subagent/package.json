@@ -1,0 +1,22 @@
+{
+  "name": "pi-subagent-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local stdio MCP server that delegates tasks to the pi coding agent.",
+  "bin": {
+    "pi-subagent-mcp": "src/server.mjs"
+  },
+  "scripts": {
+    "start": "node src/server.mjs",
+    "test": "node --test test/*.test.mjs",
+    "test:live": "PI_SUBAGENT_E2E=1 node --test test/live/e2e.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "zod": "4.6.7"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
