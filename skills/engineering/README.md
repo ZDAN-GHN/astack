@@ -22,6 +22,7 @@ Every user-invoked skill here is reachable only when you type it: `/skill:<name>
 Model- or user-reachable, so a rich trigger description pays off.
 
 - **[clean-code-reviewer](./clean-code-reviewer/SKILL.md)**: Review code against the Clean Code principles, with before/after examples per finding.
+- **[dispatching-parallel-agents](./dispatching-parallel-agents/SKILL.md)**: Split independent work across agents dispatched in one response, then review and integrate what they return.
 - **[domain-modeling](./domain-modeling/SKILL.md)**: Build and sharpen the domain model: challenge terms, test edge-case scenarios, keep `GLOSSARY.md` and ADRs current.
 - **[last30days](./last30days/SKILL.md)**: What people actually said about a topic in the last 30 days, across Reddit, X, YouTube, Hacker News, Polymarket, and GitHub.
 - **[prototype](./prototype/SKILL.md)**: Build a throwaway prototype to answer a design question: one shareable HTML file for a state model, or several switchable UI variations on one route.
