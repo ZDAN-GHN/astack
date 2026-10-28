@@ -28,7 +28,7 @@ Skip Phase A only when the work is genuinely greenfield with no surrounding syst
 
 Run the **arena** skill with the design-sketch task and the Phase A grounding artifacts. Pass `references/runner-prompt.md` as each runner's prompt.
 
-Take the runners from the `runner` seat in [arena's Seats](../arena/SKILL.md#seats). When your environment keeps a separate role mapping for architecture candidates, use it in place of the plain runner mapping; otherwise the runner seat covers both.
+Take the runners from the `runner` seat in `/arena`'s Seats. When your environment keeps a separate role mapping for architecture candidates, use it in place of the plain runner mapping; otherwise the runner seat covers both.
 
 Design it twice. Require at least two structurally distinct candidates before synthesis, even when the first looks sufficient. Whole-shape alternatives, not point fixes inside one shape.
 

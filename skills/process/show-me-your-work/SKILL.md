@@ -39,7 +39,7 @@ ts	phase	decision	why	evidence	result
 
 ## Logging a row
 
-Write each entry the way you'd tell a teammate what you did. Plain words, concrete actions, no AI speak or abstract jargon (the [unslop](../../tools/unslop/SKILL.md) skill applies to log text too).
+Write each entry the way you'd tell a teammate what you did. Plain words, concrete actions, no AI speak or abstract jargon (the `/unslop` skill applies to log text too).
 
 Append rows with a printf-style tab-separated line, stamping `ts` yourself. Strip stray tabs and newlines from any cell first, and prefix any cell starting with `=`, `+`, `-`, `@`, or `"` with a single quote, so a spreadsheet or formula parser reading the log treats it as text. Mind those same bytes when cells come from generated or user-supplied text.
 
@@ -55,8 +55,7 @@ Commit it only when the work is ambitious enough that a reviewer needs the trail
 
 ## Rules
 
-- Append-only. A wrong call gets a new row that supersedes it. Never edit or delete history.
-- Prefer evidence produced by committed scripts over hand-made one-offs (the [encode-lessons-in-structure](../../engineering/principles/references/principle-encode-lessons-in-structure/SKILL.md) principle).
+Append-only. A wrong call gets a new row that supersedes it. Never edit or delete history.
 
 ## Audit the log against the transcript
 

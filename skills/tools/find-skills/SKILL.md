@@ -1,7 +1,6 @@
 ---
 name: find-skills
 description: Helps users discover and install agent skills when they ask questions like "how do I do X", "find a skill for X", "is there a skill that can...", or express interest in extending capabilities. This skill should be used when the user is looking for functionality that might exist as an installable skill.
-disable-model-invocation: true
 ---
 
 # Find Skills
@@ -25,9 +24,9 @@ The Skills CLI (`npx skills`) is the package manager for the open agent skills e
 
 **Key commands:**
 
-- `npx skills find [query] [--owner <owner>]` - Search for skills interactively or by keyword, optionally scoped to a GitHub owner. **Discovery only — this is the only command this skill runs itself.** (Note: the CLI can be interactive and may fail in sandboxed agent environments; if it hangs or errors, fall back to browsing https://skills.sh/ instead.)
-- `npx skills add <package>` - Installs straight into an agent's skill directory, bypassing the unified skill library. **Do not run it from this skill** — installs go through install-skill (see Step 6).
-- `npx skills update` - Same caveat: it updates wherever `npx skills add` placed things, not `~/.agent-plugins/skills/`. Do not run it from this skill.
+- `npx skills find [query] [--owner <owner>]` - Search for skills interactively or by keyword, optionally scoped to a GitHub owner
+- `npx skills add <package>` - Install a skill from GitHub or other sources
+- `npx skills update` - Update all installed skills
 
 **Browse skills at:** https://skills.sh/
 
@@ -87,32 +86,21 @@ I found a skill that might help! The "react-best-practices" skill provides
 React and Next.js performance optimization guidelines from Vercel Engineering.
 (185K installs)
 
-Want me to install it? I'll run it through the install-skill flow:
-download into the unified library ~/.agent-plugins/skills/, then
-optionally symlink it to your agents (Claude Code / Codex / DSH / pi).
+To install it:
+npx skills add vercel-labs/agent-skills@react-best-practices
 
 Learn more: https://skills.sh/vercel-labs/agent-skills/react-best-practices
 ```
 
-### Step 6: Install via the install-skill Skill
+### Step 6: Offer to Install
 
-When the user confirms they want to install a skill, do **not** run `npx skills add` directly. Instead, hand off to the **install-skill** skill so the install goes through the unified skill library (`~/.agent-plugins/skills/`).
+If the user wants to proceed, you can install the skill for them:
 
-**Why:** `npx skills add <skill> -g -y` installs straight into an agent's skill directory (e.g. `~/.claude/skills/`) with no category, no duplicate check, and no link management. That bypasses the unified skill library — the single source of truth this setup is built on (see install-skill: "不允许直接安装到任何 Agent 的技能目录").
+```bash
+npx skills add <owner/repo@skill> -g -y
+```
 
-**How to hand off:**
-
-1. Get explicit user confirmation for the install. **This confirmation is the authorization for everything below.**
-2. Read (index) the install-skill skill and follow its process:
-
-   ```
-   ~/.agent-plugins/skills/tools/install-skill/SKILL.md
-   ```
-
-   > install-skill is marked `disable-model-invocation: true`, which only restricts the skill system's auto-invocation entry point: the model must not trigger it on its own. It does not forbid reading the file. Once the user has explicitly confirmed an install, indexing install-skill and following its process is executing the user's instruction, not an unprompted invocation. Its built-in confirmation steps (category, duplicates, link targets) still apply and must not be skipped.
-3. Pass the source in a format install-skill understands. A skills.sh result `owner/repo@skill-name` maps to the GitHub repo `owner/repo`; install-skill resolves the skill's directory inside that repo (conventionally `skills/<skill-name>/`, verified via the GitHub API).
-
-**Fallback:** if install-skill's SKILL.md cannot be read (e.g. the unified library does not exist on this machine), stop and tell the user to run `/install-skill` manually. Do **not** silently fall back to `npx skills add` — that would quietly violate the unified-library architecture.
+The `-g` flag installs globally (user-level) and `-y` skips confirmation prompts.
 
 ## Common Skill Categories
 

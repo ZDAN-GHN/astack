@@ -6,11 +6,32 @@ This repo is a skill library, not a project to build or test. Each directory und
 
 | Item | Rule |
 |---|---|
-| Skill | `skills/<category>/<skill-name>/SKILL.md` |
-| Category | Reuse an existing directory: `design` `education` `engineering` `process` `productivity` `tools` |
-| New category | Only when no existing one fits; lowercase, single word |
+| Skill | `skills/<bucket>/<skill-name>/SKILL.md` |
+| Bucket | Reuse an existing directory: `design` `education` `engineering` `process` `tools` |
+| New bucket | Only when no existing one fits; lowercase, single word |
+| Bucket index | `skills/<bucket>/README.md` lists every skill in the bucket |
+| Root index | `README.md` lists the buckets only, never individual skills |
 | Supporting files | `references/`, `scripts/`, and assets stay beside `SKILL.md` |
 | Frontmatter | `name` must equal the skill directory name |
+
+## Buckets and indexes
+
+A bucket is a folder under `skills/`, and it is the unit that carries an index. The model is Matt Pocock's `mattpocock/skills` layout, minus the parts that serve a published plugin.
+
+- `skills/<bucket>/README.md` starts with the bucket name and a one-line purpose, then groups entries under `## User-invoked` and `## Model-invoked`. Each entry is `- **[name](./name/SKILL.md)**: one-line description.` A bucket with a single skill uses a flat list with the invocation named on the line instead.
+- The one-liner is our own human-facing summary of the skill, never a pasted trigger list. The skill name always links to its `SKILL.md`.
+- The root `README.md` describes the repo and lists buckets with a one-line purpose each. A skill listed there as well would go stale twice, so it never is.
+- No lifecycle buckets. There is no `misc/`, `in-progress/`, or `deprecated/`: a retired skill is deleted, and git history is the archive. Do not create an empty bucket.
+
+Invocation is the axis the indexes sort on. Every skill is either user-invoked (`disable-model-invocation: true`, reachable only as `/skill:<name>`, description read by a human) or model-invoked (no flag, description carries trigger phrasing). Keep whichever mode upstream chose.
+
+Adding, renaming, or removing a skill, or flipping its invocation mode, updates that bucket's `README.md` in the same change. An index that misses a skill, or routes to one that is gone, is a defect, not a chore for later. A new or removed bucket also updates the table in the root `README.md`.
+
+## Skill references
+
+A skill that points at another skill names it as `/<skill-name>`: ``run `/grilling` ``, ``see `/unslop` ``. Never as a path, not `~/.agents/skills/x/SKILL.md`, not `../x/SKILL.md`, not `$SKILLS_HOME/x/SKILL.md`. Paths are only for files the skill itself owns: its own `scripts/`, `references/`, and assets.
+
+This is a Pi porting rule rather than upstream wording. When an upstream skill links another skill by path, or names Claude Code's Skill tool, convert that reference to `/<skill-name>` and change nothing else in the sentence. Report it like any other adaptation. Bucket indexes are navigation, not references: they keep linking `./name/SKILL.md`.
 
 ## Install a skill
 
@@ -22,18 +43,19 @@ This repo is a skill library, not a project to build or test. Each directory und
 6. Link it and verify the link resolves:
 
    ```bash
-   ln -s /home/zdan/github/astack/skills/<category>/<name> /home/zdan/.agents/skills/<name>
-   readlink /home/zdan/.agents/skills/<name>
-   grep -c '^disable-model-invocation: true$' /home/zdan/.agents/skills/<name>/SKILL.md
+   node scripts/link-skills.mjs --check
    ```
 
-7. Report the source and revision, and any reference the copy left dangling (a playbook, skill, or path that does not exist here).
+   The script links every skill in `skills/` into `~/.agents/skills/`, replaces mismatched links, and prunes links whose target is gone. Run it without `--check` to write, with `--check` to verify. It does not read frontmatter, so check the invocation flag against upstream yourself.
+
+7. Add or update the entry in that bucket's `README.md`, and report the source and revision, plus any reference the copy left dangling (a playbook, skill, or path that does not exist here).
 
 The user runs `/reload` in Pi after a skill or its frontmatter changes.
 
 ## Facts
 
 - `~/.agents/skills/` is Pi's user skill directory. Every entry in it is a symlink to a directory in this repo, one entry per skill.
+- `scripts/link-skills.mjs` maintains those symlinks from `skills/`; it is the only supported way to publish a skill. Idempotent, no dependencies.
 - Categorize by what the skill does, not by who published it.
 - `global-agents-principle.md` is the global principles asset. Publish it by symlink at `~/.agents/AGENTS.md` for shared consumers and at `~/.pi/agent/AGENTS.md` for Pi's native context loader. This repo's own instructions remain in this file.
 
@@ -41,14 +63,14 @@ The user runs `/reload` in Pi after a skill or its frontmatter changes.
 
 | Check | Command |
 | --- | --- |
-| Frontmatter, bundled references, and published symlinks | `node scripts/check-assets.mjs --installed` |
-| Pi's native skill/global instruction discovery and configured model IDs | `node scripts/check-runtime.mjs` |
-| Checker regression fixtures | `node --test scripts/check-assets.test.mjs scripts/check-runtime.test.mjs` |
+| Every skill linked into `~/.agents/skills/` | `node scripts/link-skills.mjs --check` |
+| Bucket index matches `skills/` | by hand: every `SKILL.md` has a bucket `README.md` entry, every entry resolves |
 
-`check-assets` has a constrained dependency-free YAML reader. For Pi's exact parser, add `--pi-runtime "$(npm root -g)/@earendil-works/pi-coding-agent"`. `check-runtime` locates Pi from PATH; use its `--pi-runtime` option for another installation. Runtime checks use the selected SDK with extensions, package resources, credential access, provider refresh, and persistent model writes disabled. Passing these checks proves packaging and discovery, not the quality of future agent work. `.github/workflows/validate-assets.yml` runs the portable asset checker and its regression fixtures on pushes and pull requests; host discovery and personal symlink checks stay local.
+`.github/workflows/validate-assets.yml` also runs `scripts/check-assets.mjs` and its regression fixtures. Those scripts are not in this tree, so CI fails on checkout until they are restored; do not treat a green local link check as a green CI run.
 
 ## Don't
 
-- Do not reword, shorten, or otherwise improve copied upstream text. Report the problem instead.
+- Do not reword, shorten, or otherwise improve copied upstream text. Report the problem instead. The one exception is a cross-skill reference: convert it to `/<skill-name>` (see above).
 - Do not install with `npx skills add`: it writes into an agent's skill directory with no category and no link.
 - Do not put a real directory under `~/.agents/skills/`. That entry is a symlink, and a copy there breaks updates.
+- Do not let a bucket `README.md` drift from `skills/`. Update it in the same change that touches the skill.

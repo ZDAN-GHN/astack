@@ -1,7 +1,0 @@
-interface:
-  display_name: "Web Project Standards"
-  short_description: "Generate AI-friendly Web project rules"
-  default_prompt: "Use $web-project-standards to create AGENTS.md and CLAUDE.md rules for this TypeScript Web project."
-
-policy:
-  allow_implicit_invocation: true
