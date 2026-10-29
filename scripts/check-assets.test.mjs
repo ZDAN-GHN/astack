@@ -20,43 +20,38 @@ function library(t, files) {
   return root;
 }
 
-const ROOT_README = "| Bucket |\n| --- |\n| [`one/`](./skills/one/README.md) |\n";
+const README =
+  "## User-invoked\n\n- **[alpha](./skills/alpha/SKILL.md)**: first.\n\n## Model-invoked\n\n- **[beta](./skills/beta/SKILL.md)**: second.\n";
 
 test("a consistent library has no problems", (t) => {
   const root = library(t, {
-    "README.md": ROOT_README,
-    "skills/one/README.md": "## User-invoked\n\n- **[alpha](./alpha/SKILL.md)**: first.\n\n## Model-invoked\n\n- **[beta](./beta/SKILL.md)**: second.\n",
-    "skills/one/alpha/SKILL.md": SKILL("alpha", { user: true }),
-    "skills/one/beta/SKILL.md": SKILL("beta"),
+    "README.md": README,
+    "skills/alpha/SKILL.md": SKILL("alpha", { user: true }),
+    "skills/beta/SKILL.md": SKILL("beta"),
   });
   assert.deepEqual(checkAssets(root), []);
 });
 
-test("a flat index may name the mode on the line", (t) => {
-  const root = library(t, {
-    "README.md": ROOT_README,
-    "skills/one/README.md": "- **[alpha](./alpha/SKILL.md)**: first. User-invoked.\n",
-    "skills/one/alpha/SKILL.md": SKILL("alpha", { user: true }),
-  });
-  assert.deepEqual(checkAssets(root), []);
+test("a missing root README is reported", (t) => {
+  const root = library(t, { "skills/beta/SKILL.md": SKILL("beta") });
+  const rules = checkAssets(root).map((problem) => problem.rule);
+  assert.deepEqual(rules, ["root-readme-missing"]);
 });
 
 test("an entry with no matching skill is reported", (t) => {
   const root = library(t, {
-    "README.md": ROOT_README,
-    "skills/one/README.md": "- **[ghost](./ghost/SKILL.md)**: gone. Model-invoked.\n- **[alpha](./alpha/SKILL.md)**: first. Model-invoked.\n",
-    "skills/one/alpha/SKILL.md": SKILL("alpha"),
+    "README.md": "## Model-invoked\n\n- **[beta](./skills/beta/SKILL.md)**: second.\n- **[ghost](./skills/ghost/SKILL.md)**: gone.\n",
+    "skills/beta/SKILL.md": SKILL("beta"),
   });
   const rules = checkAssets(root).map((problem) => problem.rule);
   assert.deepEqual(rules, ["index-entry-unresolved"]);
 });
 
-test("a skill missing from its bucket index is reported", (t) => {
+test("a skill missing from the index is reported", (t) => {
   const root = library(t, {
-    "README.md": ROOT_README,
-    "skills/one/README.md": "- **[alpha](./alpha/SKILL.md)**: first. Model-invoked.\n",
-    "skills/one/alpha/SKILL.md": SKILL("alpha"),
-    "skills/one/beta/SKILL.md": SKILL("beta"),
+    "README.md": "## Model-invoked\n\n- **[beta](./skills/beta/SKILL.md)**: second.\n",
+    "skills/beta/SKILL.md": SKILL("beta"),
+    "skills/gamma/SKILL.md": SKILL("gamma"),
   });
   const rules = checkAssets(root).map((problem) => problem.rule);
   assert.deepEqual(rules, ["skill-not-indexed"]);
@@ -64,9 +59,8 @@ test("a skill missing from its bucket index is reported", (t) => {
 
 test("frontmatter name must equal the directory name", (t) => {
   const root = library(t, {
-    "README.md": ROOT_README,
-    "skills/one/README.md": "- **[alpha](./alpha/SKILL.md)**: first. Model-invoked.\n",
-    "skills/one/alpha/SKILL.md": SKILL("renamed"),
+    "README.md": "## Model-invoked\n\n- **[beta](./skills/beta/SKILL.md)**: second.\n",
+    "skills/beta/SKILL.md": SKILL("renamed"),
   });
   const rules = checkAssets(root).map((problem) => problem.rule);
   assert.deepEqual(rules, ["frontmatter-name-mismatch"]);
@@ -74,44 +68,51 @@ test("frontmatter name must equal the directory name", (t) => {
 
 test("invocation must agree between index and frontmatter", (t) => {
   const root = library(t, {
-    "README.md": ROOT_README,
-    "skills/one/README.md": "## User-invoked\n\n- **[alpha](./alpha/SKILL.md)**: first.\n",
-    "skills/one/alpha/SKILL.md": SKILL("alpha"),
+    "README.md": "## User-invoked\n\n- **[beta](./skills/beta/SKILL.md)**: second.\n",
+    "skills/beta/SKILL.md": SKILL("beta"),
   });
   const [problem] = checkAssets(root);
   assert.equal(problem.rule, "invocation-mismatch");
   assert.match(problem.message, /user-invoked/);
 });
 
-test("a flat entry that names no mode is reported", (t) => {
+test("an entry outside both invocation headings is reported", (t) => {
   const root = library(t, {
-    "README.md": ROOT_README,
-    "skills/one/README.md": "- **[alpha](./alpha/SKILL.md)**: first.\n",
-    "skills/one/alpha/SKILL.md": SKILL("alpha"),
+    "README.md": "# title\n\n- **[beta](./skills/beta/SKILL.md)**: second.\n",
+    "skills/beta/SKILL.md": SKILL("beta"),
   });
   const rules = checkAssets(root).map((problem) => problem.rule);
   assert.deepEqual(rules, ["invocation-undeclared"]);
 });
 
-test("a bucket absent from the root index is reported", (t) => {
+test("a directory without SKILL.md is reported", (t) => {
   const root = library(t, {
-    "README.md": "| Bucket |\n| --- |\n",
-    "skills/one/README.md": "- **[alpha](./alpha/SKILL.md)**: first. Model-invoked.\n",
-    "skills/one/alpha/SKILL.md": SKILL("alpha"),
-  });
-  const rules = checkAssets(root).map((problem) => problem.rule);
-  assert.deepEqual(rules, ["bucket-not-in-root-index"]);
-});
-
-test("a bucket directory without SKILL.md is reported", (t) => {
-  const root = library(t, {
-    "README.md": ROOT_README,
-    "skills/one/README.md": "- **[alpha](./alpha/SKILL.md)**: first. Model-invoked.\n",
-    "skills/one/alpha/SKILL.md": SKILL("alpha"),
-    "skills/one/half-written/notes.md": "work in progress\n",
+    "README.md": "## Model-invoked\n\n- **[beta](./skills/beta/SKILL.md)**: second.\n",
+    "skills/beta/SKILL.md": SKILL("beta"),
+    "skills/half-written/notes.md": "work in progress\n",
   });
   const rules = checkAssets(root).map((problem) => problem.rule);
   assert.deepEqual(rules, ["skill-no-skill-md"]);
+});
+
+test("a loose file in skills/ is reported", (t) => {
+  const root = library(t, {
+    "README.md": "## Model-invoked\n\n- **[beta](./skills/beta/SKILL.md)**: second.\n",
+    "skills/beta/SKILL.md": SKILL("beta"),
+    "skills/README.md": "leftover bucket index\n",
+  });
+  const rules = checkAssets(root).map((problem) => problem.rule);
+  assert.deepEqual(rules, ["skills-stray-file"]);
+});
+
+test("entries out of alphabetical order are reported", (t) => {
+  const root = library(t, {
+    "README.md": "## Model-invoked\n\n- **[beta](./skills/beta/SKILL.md)**: second.\n- **[alpha](./skills/alpha/SKILL.md)**: first.\n",
+    "skills/alpha/SKILL.md": SKILL("alpha"),
+    "skills/beta/SKILL.md": SKILL("beta"),
+  });
+  const rules = checkAssets(root).map((problem) => problem.rule);
+  assert.deepEqual(rules, ["index-order"]);
 });
 
 test("frontmatter parsing reads block scalars", () => {

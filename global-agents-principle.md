@@ -38,7 +38,8 @@
 - For research that affects a decision, cite relevant sources and distinguish evidence from your recommendation.
 
 ## Verification and learning
-- Do not claim completion without checking the actual result. Run relevant tests and inspect behavior or output as appropriate.
+- Test behavior, not implementation. Correctness is defined by requirements and observable outcomes, not by the current code's structure.
+- Completion claims must be supported by verification evidence and stay within its scope. Never weaken acceptance criteria or assertions merely to obtain a pass.
 - Review the final changes for unintended effects. Report failed or skipped checks and remaining limitations plainly.
 - End substantial tasks with a brief summary of the result, verification, and anything that still needs my decision.
 - Apply my corrections to subsequent work. Suggest a durable instruction for recurring mistakes rather than creating a lesson file after every correction.
