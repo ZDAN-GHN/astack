@@ -64,9 +64,10 @@ The user runs `/reload` in Pi after a skill or its frontmatter changes.
 | Check | Command |
 | --- | --- |
 | Every skill linked into `~/.agents/skills/` | `node scripts/link-skills.mjs --check` |
-| Bucket index matches `skills/` | by hand: every `SKILL.md` has a bucket `README.md` entry, every entry resolves |
+| Bucket index, root index, frontmatter, invocation mode | `node scripts/check-assets.mjs` |
+| Checker regression tests | `node --test scripts/*.test.mjs` |
 
-`.github/workflows/validate-assets.yml` also runs `scripts/check-assets.mjs` and its regression fixtures. Those scripts are not in this tree, so CI fails on checkout until they are restored; do not treat a green local link check as a green CI run.
+`.github/workflows/validate-assets.yml` runs the last two on every push and pull request. The link check stays local, because CI has no `~/.agents/skills/`.
 
 ## Don't
 
