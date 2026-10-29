@@ -1,0 +1,5 @@
+interface:
+  display_name: "To Goal"
+  short_description: "Compile approved work into an execution handoff"
+policy:
+  allow_implicit_invocation: false
